@@ -19,4 +19,8 @@ public class Uniform {
     public void setMatrix4fv(boolean transpose, float[] value) {
         glUniformMatrix4fv(location, transpose, value);
     }
+
+    public void set2fv(float x, float y) {
+        glUniform2fv(location, new float[]{x, y});
+    }
 }

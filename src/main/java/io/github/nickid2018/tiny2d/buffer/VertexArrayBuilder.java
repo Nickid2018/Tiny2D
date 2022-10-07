@@ -35,6 +35,13 @@ public class VertexArrayBuilder {
         return this;
     }
 
+    public VertexArrayBuilder pos(float x, float y) {
+        check(VertexAttribute.POSITION_2D);
+        buffer.add(x);
+        buffer.add(y);
+        return this;
+    }
+
     public VertexArrayBuilder color(float r, float g, float b) {
         check(VertexAttribute.COLOR);
         buffer.add(r);

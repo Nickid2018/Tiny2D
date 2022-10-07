@@ -68,9 +68,15 @@ public class VertexArray {
     }
 
     @RenderThreadOnly
+    public void unbind() {
+        glBindVertexArray(0);
+    }
+
+    @RenderThreadOnly
     public void draw() {
         bind();
         glDrawElements(GL_TRIANGLES, vertexCount, GL_UNSIGNED_INT, 0);
+        unbind();
     }
 
     @RenderThreadOnly

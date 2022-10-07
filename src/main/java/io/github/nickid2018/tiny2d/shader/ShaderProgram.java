@@ -2,6 +2,7 @@ package io.github.nickid2018.tiny2d.shader;
 
 import io.github.nickid2018.tiny2d.RenderThreadOnly;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -46,5 +47,21 @@ public class ShaderProgram {
     @RenderThreadOnly
     public void use() {
         glUseProgram(program);
+    }
+
+    private static final Map<String, ShaderProgram> DEFAULT_SHADERS = new HashMap<>();
+
+    public static ShaderProgram getDefaultShader(String name) {
+        return DEFAULT_SHADERS.computeIfAbsent(name, s -> {
+            ShaderProgram program = new ShaderProgram();
+            try {
+                program.attachShader(ShaderSource.createShader(ShaderType.VERTEX, "/render/" + name + ".vsh"));
+                program.attachShader(ShaderSource.createShader(ShaderType.FRAGMENT, "/render/" + name + ".fsh"));
+                program.link();
+                return program;
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        });
     }
 }

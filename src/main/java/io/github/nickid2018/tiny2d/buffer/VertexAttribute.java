@@ -3,6 +3,8 @@ package io.github.nickid2018.tiny2d.buffer;
 public enum VertexAttribute {
 
     POSITION(3),
+
+    POSITION_2D(2),
     COLOR(3),
     COLOR_RGBA(4),
     UV(2);
