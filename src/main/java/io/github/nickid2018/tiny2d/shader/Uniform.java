@@ -1,5 +1,7 @@
 package io.github.nickid2018.tiny2d.shader;
 
+import io.github.nickid2018.tiny2d.math.Matrix4f;
+
 import static org.lwjgl.opengl.GL30.*;
 
 public class Uniform {
@@ -16,8 +18,8 @@ public class Uniform {
         return name;
     }
 
-    public void setMatrix4fv(boolean transpose, float[] value) {
-        glUniformMatrix4fv(location, transpose, value);
+    public void setMatrix4fv(boolean transpose, Matrix4f matrix) {
+        glUniformMatrix4fv(location, transpose, matrix.getMatrix());
     }
 
     public void set2fv(float x, float y) {

@@ -6,10 +6,6 @@ import static org.lwjgl.opengl.GL30.*;
 
 public class StaticTexture implements Texture {
 
-    static {
-        STBImage.stbi_set_flip_vertically_on_load(true);
-    }
-
     private final int id;
     private final Image image;
     private final int level;

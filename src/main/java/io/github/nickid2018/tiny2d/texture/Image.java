@@ -39,6 +39,10 @@ import static org.lwjgl.opengl.GL30.*;
 
 public class Image implements AutoCloseable {
 
+    static {
+        STBImage.stbi_set_flip_vertically_on_load(true);
+    }
+
     private static final Set<StandardOpenOption> OPEN_OPTIONS = EnumSet.of(StandardOpenOption.WRITE,
             StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
 
