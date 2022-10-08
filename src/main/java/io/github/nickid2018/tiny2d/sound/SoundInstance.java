@@ -27,8 +27,8 @@ public class SoundInstance {
         return SoundEngine.checkALError("allocating new source") ? null : new SoundInstance(source);
     }
 
-    private static int calculateBufferSize(AudioFormat audioFormat, int time) {
-        return (int) ((time * audioFormat.getSampleSizeInBits()) / 8.0F * audioFormat.getChannels() * audioFormat.getSampleRate());
+    private static int calculateBufferSize(AudioFormat audioFormat) {
+        return (int) (audioFormat.getSampleSizeInBits() / 8.0F * audioFormat.getChannels() * audioFormat.getSampleRate());
     }
 
     @AudioThreadOnly
@@ -141,7 +141,7 @@ public class SoundInstance {
     public SoundInstance attachBufferStream(OggAudioStream audioStream) {
         stream = audioStream;
         AudioFormat audioFormat = audioStream.getFormat();
-        streamingBufferSize = calculateBufferSize(audioFormat, 1);
+        streamingBufferSize = calculateBufferSize(audioFormat);
         pumpBuffers(4);
         return this;
     }
@@ -162,9 +162,8 @@ public class SoundInstance {
 
     @AudioThreadOnly
     public void updateStream() {
-        if (stream != null) {
-            int buffers = removeProcessedBuffers();
-            pumpBuffers(buffers);
+        if (stream != null && getState() == AL_PLAYING) {
+            pumpBuffers(removeProcessedBuffers());
         }
     }
 

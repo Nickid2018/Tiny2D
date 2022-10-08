@@ -43,3 +43,4 @@ bin/
 
 /src/test/
 .idea/
+/logs/

@@ -1,6 +1,7 @@
 package io.github.nickid2018.tiny2d.sound;
 
 import com.google.common.base.Preconditions;
+import org.lwjgl.BufferUtils;
 
 import javax.sound.sampled.AudioFormat;
 import java.io.IOException;
@@ -13,7 +14,7 @@ public class SoundBuffer {
 
     private ByteBuffer buffer;
     private AudioFormat format;
-    private int id;
+    private int id = -1;
 
     public SoundBuffer(ByteBuffer buffer, AudioFormat format) {
         this.buffer = buffer;
@@ -30,7 +31,7 @@ public class SoundBuffer {
         id = -1;
     }
 
-    private static int audioFormatToOpenAl(AudioFormat format) {
+    private static int audioFormatToOpenAL(AudioFormat format) {
         AudioFormat.Encoding encode = format.getEncoding();
         int channels = format.getChannels();
         int size = format.getSampleSizeInBits();
@@ -68,8 +69,10 @@ public class SoundBuffer {
             id = -1;
             return;
         }
-        int type = audioFormatToOpenAl(format);
+        int type = audioFormatToOpenAL(format);
         alBufferData(id, type, buffer, (int) format.getSampleRate());
+        byte[] data = new byte[buffer.remaining()];
+        buffer.get(data);
         if (SoundEngine.checkALError("assigning buffer data")) {
             alDeleteBuffers(id);
             id = -1;

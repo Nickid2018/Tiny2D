@@ -74,13 +74,13 @@ public class OggAudioStream implements Closeable {
     }
 
     private void forwardBuffer() {
-        boolean atHead = (buffer.position() == 0);
-        boolean atTail = (buffer.position() == buffer.limit());
+        boolean atHead = buffer.position() == 0;
+        boolean atTail = buffer.position() == buffer.limit();
         if (atTail && !atHead) {
             buffer.position(0);
             buffer.limit(0);
         } else {
-            ByteBuffer newBuffer = MemoryUtil.memAlloc(atHead ? (2 * buffer.capacity()) : buffer.capacity());
+            ByteBuffer newBuffer = MemoryUtil.memAlloc(atHead ? buffer.capacity() << 1 : buffer.capacity());
             newBuffer.put(buffer);
             MemoryUtil.memFree(buffer);
             newBuffer.flip();
@@ -88,24 +88,26 @@ public class OggAudioStream implements Closeable {
         }
     }
 
-    private boolean readFrame(ChannelList list) throws IOException {
+    private boolean readFrame(BufferList list) throws IOException {
         if (handle == 0L)
+            return false;
+        if (input.available() == 0)
             return false;
         try (MemoryStack stack = MemoryStack.stackPush()) {
             PointerBuffer output = stack.mallocPointer(1);
             IntBuffer channels = stack.mallocInt(1);
             IntBuffer sample = stack.mallocInt(1);
             while (true) {
-                int i = STBVorbis.stb_vorbis_decode_frame_pushdata(handle, buffer, channels, output, sample);
-                buffer.position(buffer.position() + i);
+                int readCount = STBVorbis.stb_vorbis_decode_frame_pushdata(handle, buffer, channels, output, sample);
+                buffer.position(buffer.position() + readCount);
                 int errorCode = STBVorbis.stb_vorbis_get_error(handle);
-                if (errorCode == 1) {
+                if (errorCode == STBVorbis.VORBIS_need_more_data) {
                     forwardBuffer();
                     if (refillFromStreamReturnEOF())
                         break;
                     continue;
                 }
-                if (errorCode != 0)
+                if (errorCode != STBVorbis.VORBIS__no_error)
                     throw new IOException("Failed to read Ogg file " + errorCode);
                 int sampleCount = sample.get(0);
                 if (sampleCount == 0)
@@ -126,12 +128,12 @@ public class OggAudioStream implements Closeable {
         }
     }
 
-    private void convertMono(FloatBuffer channel, ChannelList list) {
+    private void convertMono(FloatBuffer channel, BufferList list) {
         while (channel.hasRemaining())
             list.put(channel.get());
     }
 
-    private void convertStereo(FloatBuffer channel1, FloatBuffer channel2, ChannelList list) {
+    private void convertStereo(FloatBuffer channel1, FloatBuffer channel2, BufferList list) {
         while (channel1.hasRemaining() && channel2.hasRemaining()) {
             list.put(channel1.get());
             list.put(channel2.get());
@@ -151,21 +153,21 @@ public class OggAudioStream implements Closeable {
         return audioFormat;
     }
 
-    public ByteBuffer read(int channels) throws IOException {
-        ChannelList list = new ChannelList(channels + 8192);
-        while (readFrame(list) && list.byteCount < channels)
+    public ByteBuffer read(int bytes) throws IOException {
+        BufferList list = new BufferList(bytes + 8192);
+        while (readFrame(list) && list.byteCount < bytes)
             ;
         return list.get();
     }
 
     public ByteBuffer readAll() throws IOException {
-        ChannelList list = new ChannelList(16384);
+        BufferList list = new BufferList(16384);
         while (readFrame(list))
             ;
         return list.get();
     }
 
-    static class ChannelList {
+    private static class BufferList {
 
         private final List<ByteBuffer> buffers = Lists.newArrayList();
 
@@ -175,7 +177,7 @@ public class OggAudioStream implements Closeable {
 
         private ByteBuffer currentBuffer;
 
-        public ChannelList(int size) {
+        public BufferList(int size) {
             bufferSize = size + 1 & 0xFFFFFFFE;
             createNewBuffer();
         }
