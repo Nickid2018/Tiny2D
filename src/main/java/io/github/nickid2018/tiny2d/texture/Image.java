@@ -20,6 +20,7 @@ import org.apache.commons.io.IOUtils;
 import org.lwjgl.stb.*;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.system.MemoryUtil;
+import org.lwjgl.system.windows.User32;
 
 import javax.annotation.Nullable;
 import java.io.File;
@@ -71,6 +72,7 @@ public class Image implements AutoCloseable {
         } else {
             pixels = MemoryUtil.nmemAlloc(size);
         }
+        MemoryUtil.memSet(pixels, (byte) 0, size);
     }
 
     public Image(ImageFormat format, int width, int height, boolean useStbFree, long addr) {

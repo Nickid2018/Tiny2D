@@ -13,6 +13,8 @@ public class Window {
     private final long windowID;
     private int maxFPS;
 
+    private int width, height;
+
     public Window(String title, int width, int height) {
         glfwInit();
         windowID = glfwCreateWindow(width, height, title, MemoryUtil.NULL, MemoryUtil.NULL);
@@ -20,6 +22,8 @@ public class Window {
         GL.createCapabilities();
         glfwSetFramebufferSizeCallback(windowID, (window, w, h) -> glViewport(0, 0, w, h));
         glViewport(0, 0, width, height);
+        this.width = width;
+        this.height = height;
     }
 
     public void setMaxFPS(int maxFPS) {
@@ -50,22 +54,26 @@ public class Window {
     public void addFramebufferSizeCallback(BiConsumer<Integer, Integer> consumer) {
         glfwSetFramebufferSizeCallback(windowID, (window, w, h) -> {
             glViewport(0, 0, w, h);
+            width = w;
+            height = h;
             consumer.accept(w, h);
         });
     }
 
     public int getWidth() {
-        int[] width = new int[1];
-        int[] height = new int[1];
-        glfwGetFramebufferSize(windowID, width, height);
-        return width[0];
+        return width;
     }
 
     public int getHeight() {
-        int[] width = new int[1];
-        int[] height = new int[1];
-        glfwGetFramebufferSize(windowID, width, height);
-        return height[0];
+        return height;
+    }
+
+    public float toNDCX(float x) {
+        return x / width * 2 - 1;
+    }
+
+    public float toNDCY(float y) {
+        return 1 - y / height * 2;
     }
 
     public void close() {

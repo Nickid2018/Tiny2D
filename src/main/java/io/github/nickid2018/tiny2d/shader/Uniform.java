@@ -18,7 +18,7 @@ public class Uniform {
         return name;
     }
 
-    public void setMatrix4fv(boolean transpose, Matrix4f matrix) {
+    public void setMatrix4f(boolean transpose, Matrix4f matrix) {
         glUniformMatrix4fv(location, transpose, matrix.getMatrix());
     }
 

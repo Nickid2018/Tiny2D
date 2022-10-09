@@ -6,15 +6,15 @@ public class Matrix4f {
 
     private final float[][] matrix = new float[4][4];
 
+    public static final Matrix4f IDENTITY = new Matrix4f(new float[][]{
+            {1, 0, 0, 0},
+            {0, 1, 0, 0},
+            {0, 0, 1, 0},
+            {0, 0, 0, 1}
+    });
+
     public Matrix4f() {
-        Arrays.fill(matrix[0], 0);
-        Arrays.fill(matrix[1], 0);
-        Arrays.fill(matrix[2], 0);
-        Arrays.fill(matrix[3], 0);
-        matrix[0][0] = 1;
-        matrix[1][1] = 1;
-        matrix[2][2] = 1;
-        matrix[3][3] = 1;
+        this(IDENTITY.matrix);
     }
 
     public Matrix4f(float[][] matrix) {
@@ -129,7 +129,7 @@ public class Matrix4f {
     }
 
     public static Matrix4f identity() {
-        return new Matrix4f();
+        return IDENTITY;
     }
 
     public float[] getMatrix() {

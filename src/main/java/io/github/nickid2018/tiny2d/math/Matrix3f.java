@@ -6,16 +6,20 @@ public class Matrix3f {
 
     private final float[][] matrix = new float[3][3];
 
+    public static final Matrix3f IDENTITY = new Matrix3f(new float[][]{
+            {1, 0, 0},
+            {0, 1, 0},
+            {0, 0, 1}
+    });
+
     public Matrix3f() {
-        matrix[0][0] = 1;
-        matrix[1][1] = 1;
-        matrix[2][2] = 1;
+        this(IDENTITY.matrix);
     }
 
     public Matrix3f(float[][] matrix) {
-        this.matrix[0] = matrix[0].clone();
-        this.matrix[1] = matrix[1].clone();
-        this.matrix[2] = matrix[2].clone();
+        this.matrix[0] = Arrays.copyOf(matrix[0], 3);
+        this.matrix[1] = Arrays.copyOf(matrix[1], 3);
+        this.matrix[2] = Arrays.copyOf(matrix[2], 3);
     }
 
     public Matrix3f multiply(Matrix3f matrix) {
@@ -106,7 +110,7 @@ public class Matrix3f {
     }
 
     public static Matrix3f identity() {
-        return new Matrix3f();
+        return IDENTITY;
     }
 
     @Override

@@ -9,6 +9,8 @@ public class VertexAttributeList {
 
     public static final VertexAttributeList TEXTURE_2D =
             new VertexAttributeList(VertexAttribute.POSITION_2D, VertexAttribute.UV);
+    public static final VertexAttributeList FONT =
+            new VertexAttributeList(VertexAttribute.POSITION_2D, VertexAttribute.COLOR, VertexAttribute.UV);
     public static final VertexAttributeList TEXTURE =
             new VertexAttributeList(VertexAttribute.POSITION, VertexAttribute.UV);
     public static final VertexAttributeList COLOR_TEXTURE =
