@@ -81,7 +81,7 @@ public class FontAtlas {
     @RenderThreadOnly
     public void refresh() {
         if (texture == null)
-            texture = new StaticTexture(image, 0).setLinear(true).setClamp(true);
+            texture = new StaticTexture(image, 0).setLinear(false).setClamp(true);
         while (!toUpdates.isEmpty()) {
             FontVertexInfos info = toUpdates.poll();
             int x = (int) (info.minU * atlasSize);
