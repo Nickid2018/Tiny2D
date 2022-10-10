@@ -10,7 +10,6 @@ import io.github.nickid2018.tiny2d.util.LazyLoadValue;
 import io.github.nickid2018.tiny2d.window.Window;
 
 import java.io.IOException;
-import java.nio.IntBuffer;
 import java.util.List;
 
 import static org.lwjgl.opengl.GL11.*;
@@ -23,8 +22,8 @@ public class FontRenderer {
     private static final LazyLoadValue<ShaderProgram> TEXT_SHADER = new LazyLoadValue<>(() -> {
         ShaderProgram program = new ShaderProgram();
         try {
-            program.attachShader(ShaderSource.createShader(ShaderType.VERTEX, "/render/font.vsh"));
-            program.attachShader(ShaderSource.createShader(ShaderType.FRAGMENT, "/render/font.fsh"));
+            program.attachShader(ShaderSource.createShader(ShaderType.VERTEX, "/assets/shader/font.vsh"));
+            program.attachShader(ShaderSource.createShader(ShaderType.FRAGMENT, "/assets/shader/font.fsh"));
             program.link();
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -63,7 +62,7 @@ public class FontRenderer {
                 glEnable(GL_BLEND);
                 glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
                 atlas.getTexture().bind();
-                VertexArrayBuilder builder = new VertexArrayBuilder(VertexAttributeList.FONT, IndexBufferProvider.DEFAULT);
+                VertexArrayBuilder builder = new VertexArrayBuilder(VertexAttributeList.COLOR_TEXTURE_2D, IndexBufferProvider.DEFAULT);
                 builder.pos(ndcX1, ndcY1).color(r, g, b).uv(info.minU, info.minV).end();
                 builder.pos(ndcX2, ndcY1).color(r, g, b).uv(info.maxU, info.minV).end();
                 builder.pos(ndcX1, ndcY2).color(r, g, b).uv(info.minU, info.maxV).end();

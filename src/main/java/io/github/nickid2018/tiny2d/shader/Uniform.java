@@ -1,6 +1,7 @@
 package io.github.nickid2018.tiny2d.shader;
 
 import io.github.nickid2018.tiny2d.math.Matrix4f;
+import io.github.nickid2018.tiny2d.math.Vec2f;
 
 import static org.lwjgl.opengl.GL30.*;
 
@@ -22,7 +23,11 @@ public class Uniform {
         glUniformMatrix4fv(location, transpose, matrix.getMatrix());
     }
 
-    public void set2fv(float x, float y) {
-        glUniform2fv(location, new float[]{x, y});
+    public void setFloat(float value) {
+        glUniform1f(location, value);
+    }
+
+    public void set2fv(Vec2f vector) {
+        glUniform2fv(location, new float[]{vector.x, vector.y});
     }
 }
