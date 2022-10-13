@@ -1,15 +1,20 @@
 package io.github.nickid2018.tiny2d.font;
 
 import io.github.nickid2018.tiny2d.buffer.IndexBufferProvider;
+import io.github.nickid2018.tiny2d.buffer.VertexArray;
 import io.github.nickid2018.tiny2d.buffer.VertexArrayBuilder;
 import io.github.nickid2018.tiny2d.buffer.VertexAttributeList;
 import io.github.nickid2018.tiny2d.shader.ShaderProgram;
 import io.github.nickid2018.tiny2d.shader.ShaderSource;
 import io.github.nickid2018.tiny2d.shader.ShaderType;
+import io.github.nickid2018.tiny2d.texture.StaticTexture;
 import io.github.nickid2018.tiny2d.util.LazyLoadValue;
 import io.github.nickid2018.tiny2d.window.Window;
+import it.unimi.dsi.fastutil.Pair;
+import it.unimi.dsi.fastutil.objects.ObjectObjectImmutablePair;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.lwjgl.opengl.GL11.*;
@@ -40,12 +45,14 @@ public class FontRenderer {
         return font;
     }
 
-    public void drawString(String text, int x, int y, int size) {
-        drawString(text, x, y, size, 0, 0, 0);
+    public List<Pair<StaticTexture, VertexArray>> createTextArrayData(String text, int x, int y, int size) {
+        return createTextArrayData(text, x, y, size, 0, 0, 0);
     }
 
-    public void drawString(String text, int x, int y, int size, float r, float g, float b) {
+    public List<Pair<StaticTexture, VertexArray>> createTextArrayData(
+            String text, int x, int y, int size, float r, float g, float b) {
         List<FontVertexInfos> infos = text.codePoints().mapToObj(c -> font.getCodepointInfo(size, c)).toList();
+        List<Pair<StaticTexture, VertexArray>> storedArrays = new ArrayList<>();
         float xNow = x;
         for (int i = 0; i < infos.size(); i++) {
             FontVertexInfos info = infos.get(i);
@@ -59,17 +66,12 @@ public class FontRenderer {
                 float ndcY1 = window.toNDCY(y1);
                 float ndcX2 = window.toNDCX(x2);
                 float ndcY2 = window.toNDCY(y2);
-                glEnable(GL_BLEND);
-                glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-                atlas.getTexture().bind();
                 VertexArrayBuilder builder = new VertexArrayBuilder(VertexAttributeList.COLOR_TEXTURE_2D, IndexBufferProvider.DEFAULT);
                 builder.pos(ndcX1, ndcY1).color(r, g, b).uv(info.minU, info.minV).end();
                 builder.pos(ndcX2, ndcY1).color(r, g, b).uv(info.maxU, info.minV).end();
                 builder.pos(ndcX1, ndcY2).color(r, g, b).uv(info.minU, info.maxV).end();
                 builder.pos(ndcX2, ndcY2).color(r, g, b).uv(info.maxU, info.maxV).end();
-                TEXT_SHADER.get().use();
-                builder.build().draw();
-                glDisable(GL_BLEND);
+                storedArrays.add(new ObjectObjectImmutablePair<>(atlas.getTexture(), builder.build()));
             }
             xNow += info.advanceWidth;
             if (i < infos.size() - 1) {
@@ -77,5 +79,31 @@ public class FontRenderer {
                 xNow += font.getKerning(size, info.codepoint, nextInfo.codepoint);
             }
         }
+        return storedArrays;
+    }
+
+    public static void drawTextArrayData(List<Pair<StaticTexture, VertexArray>> storedArrays) {
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        TEXT_SHADER.get().use();
+        storedArrays.forEach(pair -> {
+            pair.left().bind();
+            pair.right().draw();
+        });
+        glDisable(GL_BLEND);
+    }
+
+    public static void destroyTextArrayData(List<Pair<StaticTexture, VertexArray>> storedArrays) {
+        storedArrays.forEach(pair -> pair.right().destroy());
+    }
+
+    public void drawStringImmediately(String text, int x, int y, int size) {
+        drawStringImmediately(text, x, y, size, 0, 0, 0);
+    }
+
+    public void drawStringImmediately(String text, int x, int y, int size, float r, float g, float b) {
+        List<Pair<StaticTexture, VertexArray>> storedArrays = createTextArrayData(text, x, y, size, r, g, b);
+        drawTextArrayData(storedArrays);
+        destroyTextArrayData(storedArrays);
     }
 }

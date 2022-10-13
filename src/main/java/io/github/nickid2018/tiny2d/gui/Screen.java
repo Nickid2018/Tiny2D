@@ -9,8 +9,8 @@ public abstract class Screen extends RenderComponent {
 
     protected final LinkedHashMap<String, RenderComponent> components = new LinkedHashMap<>();
 
-    public Screen(int x, int y, int width, int height) {
-        super(x, y, width, height);
+    public Screen() {
+        super(0, 0, -1, -1);
     }
 
     @Override

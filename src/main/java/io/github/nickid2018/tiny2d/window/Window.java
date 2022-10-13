@@ -1,9 +1,15 @@
 package io.github.nickid2018.tiny2d.window;
 
+import io.github.nickid2018.tiny2d.buffer.FrameBuffer;
+import io.github.nickid2018.tiny2d.font.FontRenderer;
+import io.github.nickid2018.tiny2d.font.VectorFont;
+import io.github.nickid2018.tiny2d.gui.GuiRenderContext;
+import io.github.nickid2018.tiny2d.gui.Screen;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.system.MemoryUtil;
 
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 import static org.lwjgl.opengl.GL30.*;
 import static org.lwjgl.glfw.GLFW.*;
@@ -15,7 +21,17 @@ public class Window {
 
     private int width, height;
 
-    public Window(String title, int width, int height) {
+    private double lastRecordTime;
+    private int fpsCount = 0;
+    private int lastFPS = 0;
+
+    private FontRenderer fontRenderer;
+    private FrameBuffer defaultFrameBuffer;
+
+    private Consumer<FrameBuffer> postRender;
+    private Screen currentScreen;
+
+    public Window(String title, int width, int height, VectorFont font) {
         glfwInit();
         windowID = glfwCreateWindow(width, height, title, MemoryUtil.NULL, MemoryUtil.NULL);
         glfwMakeContextCurrent(windowID);
@@ -24,6 +40,8 @@ public class Window {
         glViewport(0, 0, width, height);
         this.width = width;
         this.height = height;
+        defaultFrameBuffer = new FrameBuffer(width, height);
+        fontRenderer = new FontRenderer(this, font);
     }
 
     public void setMaxFPS(int maxFPS) {
@@ -34,29 +52,62 @@ public class Window {
         glfwSwapInterval(vsync ? 1 : 0);
     }
 
-    public void run(Runnable runnable) {
+    public void run(Runnable programExtraLogic) {
         while (!glfwWindowShouldClose(windowID)) {
-            long start = System.currentTimeMillis();
-            runnable.run();
+            double startTime = glfwGetTime();
+
+            glClearColor(1, 1, 1, 1);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+            defaultFrameBuffer.bind();
+            glClearColor(1, 1, 1, 1);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            if (currentScreen != null)
+                currentScreen.render(new GuiRenderContext(this, fontRenderer, defaultFrameBuffer));
+            defaultFrameBuffer.unbind();
+
+            if (postRender != null)
+                postRender.accept(defaultFrameBuffer);
+            else
+                defaultFrameBuffer.renderToScreen();
+
+            programExtraLogic.run();
+
             glfwSwapBuffers(windowID);
             glfwPollEvents();
+
+            fpsCount++;
+            if (glfwGetTime() - lastRecordTime >= 1) {
+                lastFPS = fpsCount;
+                fpsCount = 0;
+                lastRecordTime = glfwGetTime();
+            }
+
+            double endTime = glfwGetTime();
+
             if (maxFPS > 0) {
-                long end = System.currentTimeMillis();
-                if (end - start < 1000 / maxFPS)
+                double time = endTime - startTime;
+                double sleepTime = 1.0 / maxFPS - time;
+                if (sleepTime > 0)
                     try {
-                        Thread.sleep(1000 / maxFPS - (end - start));
-                    } catch (InterruptedException ignored) {
+                        Thread.sleep((long) (sleepTime * 1000));
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
                     }
             }
         }
     }
 
-    public void addFramebufferSizeCallback(BiConsumer<Integer, Integer> consumer) {
+    public void addFramebufferSizeCallback(BiConsumer<Integer, Integer> extraListenResize) {
         glfwSetFramebufferSizeCallback(windowID, (window, w, h) -> {
             glViewport(0, 0, w, h);
             width = w;
             height = h;
-            consumer.accept(w, h);
+            if (w != 0 && h != 0) {
+                defaultFrameBuffer.delete();
+                defaultFrameBuffer = new FrameBuffer(width, height);
+            }
+            extraListenResize.accept(w, h);
         });
     }
 
@@ -74,6 +125,20 @@ public class Window {
 
     public float toNDCY(float y) {
         return 1 - y / height * 2;
+    }
+
+    public int getFPS() {
+        return lastFPS;
+    }
+
+    public void switchScreen(Screen next) {
+        if (currentScreen != null)
+            currentScreen.onDispose();
+        currentScreen = next;
+    }
+
+    public void setFontRenderer(FontRenderer fontRenderer) {
+        this.fontRenderer = fontRenderer;
     }
 
     public void close() {
