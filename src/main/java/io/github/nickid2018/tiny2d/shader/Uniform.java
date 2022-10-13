@@ -1,10 +1,12 @@
 package io.github.nickid2018.tiny2d.shader;
 
+import io.github.nickid2018.tiny2d.RenderThreadOnly;
 import io.github.nickid2018.tiny2d.math.Matrix4f;
 import io.github.nickid2018.tiny2d.math.Vec2f;
 
 import static org.lwjgl.opengl.GL30.*;
 
+@RenderThreadOnly
 public class Uniform {
 
     private final String name;

@@ -1,5 +1,6 @@
 package io.github.nickid2018.tiny2d.gui;
 
+import io.github.nickid2018.tiny2d.RenderThreadOnly;
 import io.github.nickid2018.tiny2d.buffer.IndexBufferProvider;
 import io.github.nickid2018.tiny2d.buffer.VertexArray;
 import io.github.nickid2018.tiny2d.buffer.VertexArrayBuilder;
@@ -8,10 +9,22 @@ import io.github.nickid2018.tiny2d.window.Window;
 
 public abstract class RenderComponent {
 
-    private int x, y;
-    private int width, height;
+    protected Window window;
+    protected int x, y;
+    protected int width, height;
 
-    public RenderComponent(int x, int y, int width, int height) {
+    public RenderComponent(Window window) {
+        this.window = window;
+    }
+
+    public RenderComponent(Window window, int x, int y) {
+        this.window = window;
+        this.x = x;
+        this.y = y;
+    }
+
+    public RenderComponent(Window window, int x, int y, int width, int height) {
+        this.window = window;
         this.x = x;
         this.y = y;
         this.width = width;
@@ -24,7 +37,8 @@ public abstract class RenderComponent {
     public void onComponentShapeChanged() {
     }
 
-    public void onWindowResize(Window window) {
+    public void onWindowResize() {
+        onComponentShapeChanged();
     }
 
     public void onDispose() {
@@ -62,6 +76,7 @@ public abstract class RenderComponent {
         this.height = height;
     }
 
+    @RenderThreadOnly
     protected VertexArray createWindowColoredTexture(Window window) {
         VertexArrayBuilder builder = new VertexArrayBuilder(
                 VertexAttributeList.COLOR_TEXTURE_2D, IndexBufferProvider.DEFAULT);

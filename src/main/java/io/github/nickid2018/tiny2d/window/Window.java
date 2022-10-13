@@ -36,7 +36,7 @@ public class Window {
         windowID = glfwCreateWindow(width, height, title, MemoryUtil.NULL, MemoryUtil.NULL);
         glfwMakeContextCurrent(windowID);
         GL.createCapabilities();
-        glfwSetFramebufferSizeCallback(windowID, (window, w, h) -> glViewport(0, 0, w, h));
+        addFramebufferSizeCallback(null);
         glViewport(0, 0, width, height);
         this.width = width;
         this.height = height;
@@ -71,7 +71,8 @@ public class Window {
             else
                 defaultFrameBuffer.renderToScreen();
 
-            programExtraLogic.run();
+            if (programExtraLogic != null)
+                programExtraLogic.run();
 
             glfwSwapBuffers(windowID);
             glfwPollEvents();
@@ -107,7 +108,10 @@ public class Window {
                 defaultFrameBuffer.delete();
                 defaultFrameBuffer = new FrameBuffer(width, height);
             }
-            extraListenResize.accept(w, h);
+            if (currentScreen != null)
+                currentScreen.onWindowResize();
+            if (extraListenResize != null)
+                extraListenResize.accept(w, h);
         });
     }
 
@@ -144,5 +148,9 @@ public class Window {
     public void close() {
         glfwDestroyWindow(windowID);
         glfwTerminate();
+    }
+
+    public FontRenderer getFontRenderer() {
+        return fontRenderer;
     }
 }

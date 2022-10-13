@@ -1,5 +1,6 @@
 package io.github.nickid2018.tiny2d.gui;
 
+import io.github.nickid2018.tiny2d.RenderThreadOnly;
 import io.github.nickid2018.tiny2d.window.Window;
 
 import java.util.LinkedHashMap;
@@ -9,8 +10,8 @@ public abstract class Screen extends RenderComponent {
 
     protected final LinkedHashMap<String, RenderComponent> components = new LinkedHashMap<>();
 
-    public Screen() {
-        super(0, 0, -1, -1);
+    public Screen(Window window) {
+        super(window);
     }
 
     @Override
@@ -20,10 +21,13 @@ public abstract class Screen extends RenderComponent {
     }
 
     @Override
-    public void onWindowResize(Window window) {
-        setWidth(window.getWidth());
-        setHeight(window.getHeight());
-        components.values().forEach(c -> c.onWindowResize(window));
+    public void onWindowResize() {
+        components.values().forEach(RenderComponent::onWindowResize);
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T extends RenderComponent> T getComponent(String name) {
+        return (T) components.get(name);
     }
 
     public Map<String, RenderComponent> getComponents() {

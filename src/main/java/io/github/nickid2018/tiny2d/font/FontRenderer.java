@@ -41,6 +41,15 @@ public class FontRenderer {
         this.font = font;
     }
 
+    public int getTextWidth(String text, int size) {
+        int width = 0;
+        int[] codePoints = text.codePoints().toArray();
+        for (int i = 0; i < codePoints.length - 1; i++)
+            width += font.getKerning(size, codePoints[i], codePoints[i + 1]);
+        width += text.codePoints().map(codepoint -> (int) font.getCharLength(size, codepoint)).sum();
+        return width;
+    }
+
     public VectorFont getFont() {
         return font;
     }
