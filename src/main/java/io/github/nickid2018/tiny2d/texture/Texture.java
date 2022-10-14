@@ -8,7 +8,7 @@ import static org.lwjgl.opengl.GL11.*;
 public interface Texture {
 
     @RenderThreadOnly
-    void bind();
+    void bindInternal();
 
     @RenderThreadOnly
     default void unbind() {
@@ -16,9 +16,15 @@ public interface Texture {
     }
 
     @RenderThreadOnly
+    default void bind() {
+        GL30.glActiveTexture(GL30.GL_TEXTURE0);
+        bindInternal();
+    }
+
+    @RenderThreadOnly
     default void activeAndBind(int unit) {
         GL30.glActiveTexture(GL30.GL_TEXTURE0 + unit);
-        bind();
+        bindInternal();
     }
 
     boolean isLinear();

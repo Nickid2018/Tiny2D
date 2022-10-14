@@ -34,7 +34,7 @@ public class DynamicTexture implements Texture {
 
     @Override
     @RenderThreadOnly
-    public void bind() {
+    public void bindInternal() {
         if (totalTime != 0) {
             long remaining = System.currentTimeMillis() % totalTime;
             for (int now = 0; now < delays.size(); now++) {

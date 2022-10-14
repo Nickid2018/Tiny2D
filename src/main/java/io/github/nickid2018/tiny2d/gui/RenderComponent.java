@@ -5,30 +5,45 @@ import io.github.nickid2018.tiny2d.buffer.IndexBufferProvider;
 import io.github.nickid2018.tiny2d.buffer.VertexArray;
 import io.github.nickid2018.tiny2d.buffer.VertexArrayBuilder;
 import io.github.nickid2018.tiny2d.buffer.VertexAttributeList;
+import io.github.nickid2018.tiny2d.math.AABB;
 import io.github.nickid2018.tiny2d.window.Window;
 
 public abstract class RenderComponent {
 
     protected Window window;
-    protected int x, y;
-    protected int width, height;
+
+    protected float x, y;
+    protected float width, height;
+
+    protected float renderX, renderY;
+    protected float renderWidth, renderHeight;
+
+    protected ComponentResizePolicy resizePolicy;
 
     public RenderComponent(Window window) {
-        this.window = window;
+        this(window, 0, 0, -1, -1);
     }
 
-    public RenderComponent(Window window, int x, int y) {
-        this.window = window;
-        this.x = x;
-        this.y = y;
+    public RenderComponent(Window window, float x, float y, float width, float height) {
+        this(window, x, y, width, height, ComponentResizePolicy.RESIZE_XY);
     }
 
-    public RenderComponent(Window window, int x, int y, int width, int height) {
+    public RenderComponent(Window window, float x, float y, float width, float height, ComponentResizePolicy resizePolicy) {
         this.window = window;
         this.x = x;
         this.y = y;
         this.width = width;
         this.height = height;
+        this.resizePolicy = resizePolicy;
+        computeRenderSize();
+    }
+
+    private void computeRenderSize() {
+        AABB aabb = resizePolicy.getAABB(x, y, width, height, window);
+        renderX = (float) aabb.minX;
+        renderY = (float) aabb.minY;
+        renderWidth = (float) (aabb.maxX - aabb.minX);
+        renderHeight = (float) (aabb.maxY - aabb.minY);
     }
 
     public void render(GuiRenderContext context) {
@@ -38,42 +53,47 @@ public abstract class RenderComponent {
     }
 
     public void onWindowResize() {
+        computeRenderSize();
         onComponentShapeChanged();
     }
 
     public void onDispose() {
     }
 
-    public int getX() {
+    public float getX() {
         return x;
     }
 
-    public int getY() {
+    public float getY() {
         return y;
     }
 
-    public int getWidth() {
+    public float getWidth() {
         return width;
     }
 
-    public int getHeight() {
+    public float getHeight() {
         return height;
     }
 
-    public void setX(int x) {
+    public void setX(float x) {
         this.x = x;
     }
 
-    public void setY(int y) {
+    public void setY(float y) {
         this.y = y;
     }
 
-    public void setWidth(int width) {
+    public void setWidth(float width) {
         this.width = width;
     }
 
-    public void setHeight(int height) {
+    public void setHeight(float height) {
         this.height = height;
+    }
+
+    public void setResizePolicy(ComponentResizePolicy resizePolicy) {
+        this.resizePolicy = resizePolicy;
     }
 
     @RenderThreadOnly

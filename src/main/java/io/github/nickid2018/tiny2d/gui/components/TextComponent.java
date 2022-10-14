@@ -2,6 +2,7 @@ package io.github.nickid2018.tiny2d.gui.components;
 
 import io.github.nickid2018.tiny2d.buffer.VertexArray;
 import io.github.nickid2018.tiny2d.font.FontRenderer;
+import io.github.nickid2018.tiny2d.gui.ComponentResizePolicy;
 import io.github.nickid2018.tiny2d.gui.GuiRenderContext;
 import io.github.nickid2018.tiny2d.gui.RenderComponent;
 import io.github.nickid2018.tiny2d.texture.StaticTexture;
@@ -18,18 +19,21 @@ public class TextComponent extends RenderComponent {
 
     private List<Pair<StaticTexture, VertexArray>> arrayData;
 
-    public TextComponent(Window window, String text, int size, int x, int y) {
-        super(window, x, y);
+    public static TextComponent create(Window window, String text, int size, float x, float y) {
+        float width = window.getFontRenderer().getTextWidth(text, size);
+        return new TextComponent(window, text, size, x, y, width, (float) size);
+    }
+
+    protected TextComponent(Window window, String text, int size, float x, float y, float width, float height) {
+        super(window, x, y, width, height, ComponentResizePolicy.NO_RESIZE_XY_FIXED);
         this.size = size;
         this.text = text;
-        width = window.getFontRenderer().getTextWidth(text, size);
-        height = size;
     }
 
     @Override
     public void render(GuiRenderContext context) {
         if (arrayData == null)
-            arrayData = window.getFontRenderer().createTextArrayData(text, x, y, size, r, g, b);
+            arrayData = window.getFontRenderer().createTextArrayDataMerged(text, x, y, size, r, g, b);
         FontRenderer.drawTextArrayData(arrayData);
     }
 

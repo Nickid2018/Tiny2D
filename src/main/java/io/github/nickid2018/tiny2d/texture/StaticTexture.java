@@ -20,7 +20,7 @@ public class StaticTexture implements Texture {
     }
 
     @RenderThreadOnly
-    public void bind() {
+    public void bindInternal() {
         glBindTexture(GL_TEXTURE_2D, id);
     }
 
@@ -63,7 +63,7 @@ public class StaticTexture implements Texture {
 
     @RenderThreadOnly
     public StaticTexture update(int x, int y, int sizeX, int sizeY) {
-        bind();
+        bindInternal();
         image.upload(0, x, y, x, y, sizeX, sizeY, linear, clamp, level > 0);
         if (level > 0)
             glGenerateMipmap(level);
