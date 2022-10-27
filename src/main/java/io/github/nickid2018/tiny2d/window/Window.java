@@ -28,7 +28,7 @@ public class Window {
     private FontRenderer fontRenderer;
     private FrameBuffer defaultFrameBuffer;
 
-    private Consumer<FrameBuffer> postRender;
+    private Consumer<FrameBuffer> postRenderer;
     private Screen currentScreen;
 
     public Window(String title, int width, int height, VectorFont font) {
@@ -66,16 +66,16 @@ public class Window {
                 currentScreen.render(new GuiRenderContext(this, fontRenderer, defaultFrameBuffer));
             defaultFrameBuffer.unbind();
 
-            if (postRender != null)
-                postRender.accept(defaultFrameBuffer);
+            if (postRenderer != null)
+                postRenderer.accept(defaultFrameBuffer);
             else
                 defaultFrameBuffer.renderToScreen();
 
-            if (programExtraLogic != null)
-                programExtraLogic.run();
-
             glfwSwapBuffers(windowID);
             glfwPollEvents();
+
+            if (programExtraLogic != null)
+                programExtraLogic.run();
 
             fpsCount++;
             if (glfwGetTime() - lastRecordTime >= 1) {
@@ -92,8 +92,7 @@ public class Window {
                 if (sleepTime > 0)
                     try {
                         Thread.sleep((long) (sleepTime * 1000));
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
+                    } catch (InterruptedException ignored) {
                     }
             }
         }
@@ -139,6 +138,10 @@ public class Window {
         if (currentScreen != null)
             currentScreen.onDispose();
         currentScreen = next;
+    }
+
+    public void setPostRenderer(Consumer<FrameBuffer> postRenderer) {
+        this.postRenderer = postRenderer;
     }
 
     public void setFontRenderer(FontRenderer fontRenderer) {

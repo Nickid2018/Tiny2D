@@ -7,7 +7,6 @@ import io.github.nickid2018.tiny2d.buffer.VertexAttributeList;
 import io.github.nickid2018.tiny2d.gui.ComponentResizePolicy;
 import io.github.nickid2018.tiny2d.gui.GuiRenderContext;
 import io.github.nickid2018.tiny2d.gui.RenderComponent;
-import io.github.nickid2018.tiny2d.math.Matrix4f;
 import io.github.nickid2018.tiny2d.shader.ShaderProgram;
 import io.github.nickid2018.tiny2d.texture.StaticTexture;
 import io.github.nickid2018.tiny2d.window.Window;

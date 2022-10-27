@@ -1,9 +1,9 @@
 package io.github.nickid2018.tiny2d.shader;
 
 import io.github.nickid2018.tiny2d.RenderThreadOnly;
-import io.github.nickid2018.tiny2d.math.Matrix4f;
-import io.github.nickid2018.tiny2d.math.Vec2f;
-import io.github.nickid2018.tiny2d.math.Vec3f;
+import org.joml.Matrix4f;
+import org.joml.Vector2f;
+import org.joml.Vector3f;
 
 import static org.lwjgl.opengl.GL30.*;
 
@@ -23,14 +23,14 @@ public class Uniform {
     }
 
     public void setMatrix4f(boolean transpose, Matrix4f matrix) {
-        glUniformMatrix4fv(location, transpose, matrix.getMatrix());
+        glUniformMatrix4fv(location, transpose, matrix.get(new float[16]));
     }
 
     public void setFloat(float value) {
         glUniform1f(location, value);
     }
 
-    public void set2fv(Vec2f vector) {
+    public void set2fv(Vector2f vector) {
         glUniform2fv(location, new float[]{vector.x, vector.y});
     }
 
@@ -38,7 +38,7 @@ public class Uniform {
         glUniform2fv(location, new float[]{x, y});
     }
 
-    public void set3fv(Vec3f vector) {
+    public void set3fv(Vector3f vector) {
         glUniform3fv(location, new float[]{vector.x, vector.y, vector.z});
     }
 
